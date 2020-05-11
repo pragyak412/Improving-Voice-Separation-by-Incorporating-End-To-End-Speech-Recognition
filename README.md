@@ -1,17 +1,17 @@
-#VOICE SEPARATION 
+# VOICE SEPARATION 
 Paper: [Improving Voice Separation by Incorporating End-To-End Speech Recognition](https://ieeexplore.ieee.org/document/9053845)
 
 # Downloading the dataset
 
-## Install the packages axel, youtube-dl, parallel by using the following commands - 
+Install the packages axel, youtube-dl, parallel by using the following commands - 
 
 	apt-get install axel, youtube-dl, parallel
 
-## Install the requirements.txt file by
+Install the requirements.txt file by
 
 	pip install -r requirements.txt
 
-## Download the csv files containing youtube-id of the video
+Download the csv files containing youtube-id of the video
 
 [Train CSV](https://storage.cloud.google.com/avspeech-files/avspeech_train.csv)
 [Test CSV](https://storage.cloud.google.com/avspeech-files/avspeech_test.csv)
