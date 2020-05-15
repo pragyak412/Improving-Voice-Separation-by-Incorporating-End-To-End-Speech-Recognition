@@ -1,115 +1,125 @@
-from torch.utils.data import DataLoader
-from torch import nn
-from tqdm import tqdm
-import os
-from scipy.io.wavfile import write
-import numpy as np
-import torch
-from shutil import copyfile
-
-from dataloader import dataLoader
 from conv_tasnet import ConvTasNet
-from pit_criterion import cal_loss
+import torch
+from tqdm import tqdm
 import config
+from pit_criterion import SISNRPIT
+from dataloader import AVSpeech
+from torch.utils.data import DataLoader
+import os
+import numpy as np
+from scipy.io.wavfile import write
+from dataloader import normalise
+from torch.nn import DataParallel
+
+def init_fn(worker_id):
+
+    """
+    Function to make the pytorch dataloader deterministic
+    :param worker_id: id of the parallel worker
+    :return:
+    """
+
+    np.random.seed(0 + worker_id)
 
 
-def save(mixture, target, output, no):
+def saving(estimated, target, mixture, iteration=0):
 
-	mixture = mixture.data.cpu().numpy()
+	estimated = estimated.data.cpu().numpy()
 	target = target.data.cpu().numpy()
-	output = output.data.cpu().numpy()
+	mixture = mixture.data.cpu().numpy()
 
-	batch_size = output.shape[0]
+	os.makedirs(config.temporary_save_path['test'] + '/' + str(iteration), exist_ok=True)
 
-	base = config.synthesis + '/' + str(no) + '/'
+	for i in range(estimated.shape[0]):
 
-	os.makedirs(base, exist_ok=True)
+		os.makedirs(config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i), exist_ok=True)
 
-	for i in range(batch_size):
+		target[i, 0] = normalise(target[i, 0])
+		target[i, 1] = normalise(target[i, 1])
 
-		speaker1 = output[i, 0] - np.mean(output[i, 0])
-		speaker2 = output[i, 1] - np.mean(output[i, 1])
+		estimated[i, 0] = normalise(estimated[i, 0])
+		estimated[i, 1] = normalise(estimated[i, 1])
 
-		speaker1 = speaker1/np.max(np.abs(speaker1))
-		speaker2 = speaker2/np.max(np.abs(speaker2))
+		mixture[i] = normalise(mixture[i])
 
-		os.makedirs(base + str(i), exist_ok=True)
+		write(
+			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'target_0.wav', 8000,
+			(target[i, 0]*np.iinfo(np.int16).max).astype(np.int16))
+		write(
+			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'target_1.wav', 8000,
+			(target[i, 1]*np.iinfo(np.int16).max).astype(np.int16))
 
-		write(base + str(i) + '/targetSpeaker1.wav', 8000, (target[i, 0]*np.iinfo(np.int16).max).astype(np.int16))
-		write(base + str(i) + '/targetSpeaker2.wav', 8000, (target[i, 1]*np.iinfo(np.int16).max).astype(np.int16))
+		write(
+			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'estimated_0.wav', 8000,
+			(estimated[i, 0]*np.iinfo(np.int16).max).astype(np.int16))
+		write(
+			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'estimated_1.wav', 8000,
+			(estimated[i, 1]*np.iinfo(np.int16).max).astype(np.int16))
 
-		write(base + str(i) + '/mixture.wav', 8000, (mixture[i] * np.iinfo(np.int16).max).astype(np.int16))
+		write(
+			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'mixture.wav', 8000,
+			(mixture[i]*np.iinfo(np.int16).max).astype(np.int16))
 
-		write(base + str(i) + '/outputSpeaker1.wav', 8000, (speaker1 * np.iinfo(np.int16).max).astype(np.int16))
-		write(base + str(i) + '/outputSpeaker2.wav', 8000, (speaker2 * np.iinfo(np.int16).max).astype(np.int16))
 
-
-def test(model, data_loader):
+def test(model, dataloader):
 
 	model.eval()
-	all_loss = []
+	
+	iterator = tqdm(dataloader)
 
-	iterator = tqdm(data_loader)
+	all_loss = []
+	loss_func = SISNRPIT()
 
 	with torch.no_grad():
 
-		for no, (mixture, target, size) in enumerate(iterator):
+		for no, (mixture, target, path_i) in enumerate(iterator):
 
-			mixture = mixture.cuda()
-			target = target.cuda()
-			size = size.cuda()
+			if config.use_cuda:
+				mixture = mixture.cuda()
+				target = target.cuda()
+			
+			separated = model(mixture)
 
-			output = model(mixture)
+			loss = loss_func(separated, target)
 
-			loss, max_snr, estimate_source, reorder_estimate_source = cal_loss(target, output, size)
+			all_loss.append(loss.item())
 
-			loss = loss / config.optimizer_iteration
+			iterator.set_description('Average Loss: '+str(np.array(all_loss).mean()))
 
-			all_loss.append(loss.item() * config.optimizer_iteration)
-
-			if (no + 1) % config.periodic_output == 0:
-				save(mixture, target, output, no)
-
-			iterator.set_description(
-				'L: {0:.3f}| Avg L: {1:.3f}'.format(
-					loss.item() * config.optimizer_iteration,
-					np.array(all_loss)[-min(1000, len(all_loss)):].mean(),
-				)
-			)
+			if no % config.periodic_synthesis == 0 and no != 0:
+				saving(estimated=separated, target=target, mixture=mixture, iteration=no)
 
 	return all_loss
 
 
-def main(modelPath):
 
-	copyfile('config.py', config.basePath + '/config.py')
+def main():
+	os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-	data_loader = dataLoader('test')
-	data_loader = DataLoader(
-		data_loader, num_workers=config.numWorkers['test'], batch_size=config.batchSize['test'], shuffle=True
-	)
+	model = DataParallel(ConvTasNet(C=2))
+	dataloader = AVSpeech('test')
+	dataloader = DataLoader(dataloader, batch_size=config.batchsize['test'], num_workers=config.num_workers['test'], worker_init_fn=init_fn)
+	
+	
 
-	model = ConvTasNet(N=256, L=20, B=256, H=512, P=3, X=8, R=4, C=2).cuda()
-	model = nn.DataParallel(model)
+	if config.use_cuda:
+		model = model.cuda()
 
-	model_parameters = filter(lambda p: p.requires_grad, model.parameters())
-	params = sum([np.prod(p.size()) for p in model_parameters])
+	config.pretrained_test = [
+		'/home/SharedData/Pragya/ModelsToUse/AudioOnlyConvTasNet.pth'
+	]
 
-	print('Total number of trainable parameters: ', params)
+	for cur_test in config.pretrained_test:
 
-	savedModel = torch.load(modelPath)
+		print('Currently working on: ', cur_test.split('/')[-1])
 
-	model.load_state_dict(savedModel['state_dict'])
+		model.load_state_dict(torch.load(cur_test)['model_state_dict'])
 
-	print('Loaded the model: {0}'.format(modelPath))
+		total_loss = test(model, dataloader)
 
-	allLoss = test(model, data_loader)
+		torch.cuda.empty_cache()
 
-	print('Average Loss: {0:.6f}'.format(np.mean(allLoss)))
-
+		print('Average Loss for ', cur_test.split('/')[-1], 'is: ', np.mean(total_loss))
 
 if __name__ == "__main__":
-
-	import sys
-
-	main(modelPath=sys.argv[1])
+	main()

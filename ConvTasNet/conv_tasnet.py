@@ -5,14 +5,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from utils import overlap_and_add
-
 EPS = 1e-8
 
 
 class ConvTasNet(nn.Module):
-    def __init__(self, N, L, B, H, P, X, R, C, norm_type="gLN", causal=False,
-                 mask_nonlinear='relu'):
+    def __init__(self, C, N=512, L=20, B=512, H=512, P=3, X=8, R=4, norm_type="gLN", causal=False,
+                 mask_nonlinear='relu', init_xavier=False):
         """
         Args:
             N: Number of filters in autoencoder
@@ -38,9 +36,10 @@ class ConvTasNet(nn.Module):
         self.separator = TemporalConvNet(N, B, H, P, X, R, C, norm_type, causal, mask_nonlinear)
         self.decoder = Decoder(N, L)
         # init
-        for p in self.parameters():
-            if p.dim() > 1:
-                nn.init.xavier_normal_(p)
+        if init_xavier:
+            for p in self.parameters():
+                if p.dim() > 1:
+                    nn.init.xavier_normal_(p)
 
     def forward(self, mixture):
         """
@@ -49,14 +48,10 @@ class ConvTasNet(nn.Module):
         Returns:
             est_source: [M, C, T]
         """
+
         mixture_w = self.encoder(mixture)
         est_mask = self.separator(mixture_w)
         est_source = self.decoder(mixture_w, est_mask)
-
-        # T changed after conv1d in encoder, fix it here
-        T_origin = mixture.size(-1)
-        T_conv = est_source.size(-1)
-        est_source = F.pad(est_source, (0, T_origin - T_conv))
         return est_source
 
 
@@ -89,7 +84,8 @@ class Decoder(nn.Module):
         # Hyper-parameter
         self.N, self.L = N, L
         # Components
-        self.basis_signals = nn.Linear(N, L, bias=False)
+        # self.basis_signals = nn.Linear(N, L, bias=False)
+        self.basis_signals = nn.ConvTranspose1d(N, 1, L, L//2, bias=False)
 
     def forward(self, mixture_w, est_mask):
         """
@@ -103,8 +99,9 @@ class Decoder(nn.Module):
         source_w = torch.unsqueeze(mixture_w, 1) * est_mask  # [M, C, N, K]
         source_w = torch.transpose(source_w, 2, 3) # [M, C, K, N]
         # S = DV
-        est_source = self.basis_signals(source_w)  # [M, C, K, L]
-        est_source = overlap_and_add(est_source, self.L//2) # M x C x T
+        M, C, K, N = source_w.shape
+        est_source = self.basis_signals(source_w.view([M*C, K, N]).transpose(1, 2)).squeeze(1).view([M, C, -1])  # [M, C, K, L]
+        # est_source = overlap_and_add(est_source, self.L//2) # M x C x T
         return est_source
 
 
@@ -321,35 +318,12 @@ class GlobalLayerNorm(nn.Module):
         return gLN_y
 
 
-if __name__ == "__main__":
-    torch.manual_seed(123)
-    M, N, L, T = 2, 3, 4, 12
-    K = 2*T//L-1
-    B, H, P, X, R, C, norm_type, causal = 2, 3, 3, 3, 2, 2, "gLN", False
-    mixture = torch.randint(3, (M, T))
-    # test Encoder
-    encoder = Encoder(L, N)
-    encoder.conv1d_U.weight.data = torch.randint(2, encoder.conv1d_U.weight.size())
-    mixture_w = encoder(mixture)
-    print('mixture', mixture)
-    print('U', encoder.conv1d_U.weight)
-    print('mixture_w', mixture_w)
-    print('mixture_w size', mixture_w.size())
+if __name__ == '__main__':
 
-    # test TemporalConvNet
-    separator = TemporalConvNet(N, B, H, P, X, R, C, norm_type=norm_type, causal=causal)
-    est_mask = separator(mixture_w)
-    print('est_mask', est_mask)
-
-    # test Decoder
-    decoder = Decoder(N, L)
-    est_mask = torch.randint(2, (B, K, C, N))
-    est_source = decoder(mixture_w, est_mask)
-    print('est_source', est_source)
-
-    # test Conv-TasNet
-    conv_tasnet = ConvTasNet(N, L, B, H, P, X, R, C, norm_type=norm_type)
-    est_source = conv_tasnet(mixture)
-    print('est_source', est_source)
-    print('est_source size', est_source.size())
-
+	import os
+	import numpy as np
+	os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+	model = ConvTasNet(C=2).cuda()
+	input_ = torch.FloatTensor(np.random.normal(size=1*1*24000).reshape([1, 24000])).cuda()
+	backup = input_.clone()
+	print(model(input_)/model(3*backup))

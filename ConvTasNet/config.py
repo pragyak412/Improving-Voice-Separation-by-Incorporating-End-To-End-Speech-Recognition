@@ -1,59 +1,64 @@
 from datetime import datetime
 import os
 
-seed = 1
-
-numWorkers = {
-	'train': 6,
-	'test': 6
-}
-
-batchSize = {
-	'train': 5,
-	'test': 10
-}
-
+seed = 0
 num_cuda = '0'
-optimizer_iteration = 3 // len(num_cuda.split(','))
+use_cuda = True
+batchsize = {
+	'train': 5*len(num_cuda.split(',')),
+	'test': 10*len(num_cuda.split(','))
+}
+num_workers = {
+	'train': 4*len(num_cuda.split(',')),
+	'test': 4*len(num_cuda.split(','))
+}
+
+optimizer_iterations = 3 // len(num_cuda.split(','))
 
 lr = {
-	1: 1.3e-3,
-	10000*optimizer_iteration: 7.5e-4,
-	30000*optimizer_iteration: 5e-4,
-	50000*optimizer_iteration: 1e-4,
-	78000*optimizer_iteration: 5e-5,
-	100000*optimizer_iteration: 2.5e-5,
-	120000*optimizer_iteration: 1e-5,
-	150000*optimizer_iteration: 5e-6,
-	175000*optimizer_iteration: 1e-6,
+	1:1.3e-3,
+	10000*optimizer_iterations:7.5e-4,
+	30000*optimizer_iterations:5e-4,
+	50000*optimizer_iterations:1e-4,
+	78000*optimizer_iterations:5e-5,
 }
+
 
 iterations = {
 	'train': 3000000,
 	'test': 150000
 }
 
-dataSetPath = {
-	'train': '',
-	'test': ''
+dataset = {
+	'AVSpeech': {
+		'base_audio_path': {
+			'train': '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/train_wav_8000',
+			'test': '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/test_wav_8000'
+		}
+	}
 }
 
-preTrained = False
-preTrainedBasePath = ''
-preTrainedModel = preTrainedBasePath + '/'
-preTrainedLossPath = preTrainedBasePath + '/loss_plot_training.npy'
-startingNo = 40000*3
+num_speakers = 2
 
-if not preTrained:
-	basePath = '/'+str(datetime.now())
-else:
-	basePath = preTrainedBasePath
+periodic_synthesis = 10000
+periodic_checkpoint = 50000
 
-synthesis = basePath + '/synthesis'
+basePath = '/home/SharedData/Pragya/Experiments/ConvTasNet/'+str(datetime.now())
 
 os.makedirs(basePath, exist_ok=True)
-os.makedirs(synthesis, exist_ok=True)
 
-periodic_output = 3000
-periodic_save = 15000
+temporary_save_path = {
+	'train': basePath + '/train_synthesis',
+	'test': basePath+ '/test_synthesis',
+}
 
+os.makedirs(temporary_save_path['train'], exist_ok=True)
+os.makedirs(temporary_save_path['test'], exist_ok=True)
+
+
+model_save_path = basePath
+pretrained_test = '/home/SharedData/Pragya/Experiments/ConvTasNet/2020-05-10 19:36:07.985530/40000_model.pkl'
+
+pretrained = False
+pretrained_train = ''
+start = 132000

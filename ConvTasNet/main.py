@@ -41,8 +41,7 @@ def train():
 
 
 @main.command()
-@click.option('-modelPath', '--modelPath', help='Path to Model', required=True)
-def test(modelPath):
+def test():
 
 	"""
 	Training using strong supervision on Synth-Text dataset
@@ -54,7 +53,7 @@ def test(modelPath):
 	import config
 
 	os.environ['CUDA_VISIBLE_DEVICES'] = config.num_cuda
-	test.main(modelPath)
+	test.main()
 
 
 if __name__ == "__main__":
