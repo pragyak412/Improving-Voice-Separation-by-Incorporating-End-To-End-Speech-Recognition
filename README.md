@@ -85,11 +85,13 @@ Coming Soon
 
 ## Results
 
-### ASR
+### Automatic Speech Recognition
 
 |    CER    | CTC Loss | Attention Loss | Avg Loss |
 |-----------|----------|----------------|----------|
 |   0.5668  |  78.1625 |    49.1855     |  57.8786 |
+
+### Speech Separation
 
 |    Method   |    SI-SNR   |
 | ----------- | ----------- |
