@@ -48,9 +48,32 @@ Testing:
 	python main.py test --modelpath "Path to trained model"
 
 
-## ASR Training
+## ASR
 
-Coming Soon
+Inside the directory ETESpeechRecognition, set the config.py variables
+
+	Set config.path_to_download -> Absolute path of where you want to download the LibriSpeech dataset
+	Set config.base_model_path -> Absolute path of where you want to save the trained model
+	Set config.cache_dir -> Absolute path of where you want to save the unigram model, etc
+
+Download the dataset
+
+	cd ETESpeechRecognition
+	python downloadDataSet.py
+
+Pre-process
+
+	python main.py genunigram
+	
+Training:
+
+	python main.py train
+	
+Testing:
+
+	python main.py test
+
+	
 
 ## Oracle Training
 
@@ -61,6 +84,12 @@ Coming Soon
 Coming Soon
 
 ## Results
+
+### ASR
+
+|    CER    | CTC Loss | Attention Loss | Avg Loss |
+|...........|..........|................|..........|
+|   0.5668  |  78.1625 | 49.1855        |  57.8786 |
 
 |    Method   |    SI-SNR   |
 | ----------- | ----------- |
