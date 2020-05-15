@@ -98,3 +98,9 @@ Coming Soon
 | ConvTasNet  |     TBD     |
 |   Oracle    |     TBD     |
 |  Iterative  |     TBD     |
+
+## Credits
+
+For downloading the AVSpeech dataset, the code was modified to download only mp3 with some additional features from the repository, https://github.com/changil/avspeech-downloader.
+
+For training the ASR, the code was modified from the repository, https://github.com/mayank-git-hub/ETE-Speech-Recognition.
