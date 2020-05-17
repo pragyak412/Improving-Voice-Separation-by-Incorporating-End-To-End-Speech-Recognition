@@ -21,6 +21,9 @@ lr = {
 	30000*optimizer_iterations:5e-4,
 	50000*optimizer_iterations:1e-4,
 	78000*optimizer_iterations:5e-5,
+	100000*optimizer_iterations:2.5e-5,
+	150000*optimizer_iterations:1e-5,
+	180000*optimizer_iterations:5e-6,
 }
 
 
@@ -29,11 +32,12 @@ iterations = {
 	'test': 150000
 }
 
+
 dataset = {
 	'AVSpeech': {
 		'base_audio_path': {
-			'train': '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/train_wav_8000',
-			'test': '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/test_wav_8000'
+			'train': '',
+			'test': '',
 		}
 	}
 }
@@ -43,7 +47,7 @@ num_speakers = 2
 periodic_synthesis = 10000
 periodic_checkpoint = 50000
 
-basePath = '/home/SharedData/Pragya/Experiments/ConvTasNet/'+str(datetime.now())
+basePath = '/'+str(datetime.now())
 
 os.makedirs(basePath, exist_ok=True)
 
@@ -57,8 +61,9 @@ os.makedirs(temporary_save_path['test'], exist_ok=True)
 
 
 model_save_path = basePath
-pretrained_test = '/home/SharedData/Pragya/Experiments/ConvTasNet/2020-05-10 19:36:07.985530/40000_model.pkl'
+pretrained_test = ''
 
 pretrained = False
 pretrained_train = ''
-start = 132000
+loss_path = ''
+start = 300000

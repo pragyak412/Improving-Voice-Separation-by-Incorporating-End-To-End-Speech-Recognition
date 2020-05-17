@@ -157,7 +157,7 @@ def main():
 		saved_model = torch.load(config.pretrained_train)
 		model.load_state_dict(saved_model['model_state_dict'])
 		optimizer.load_state_dict(saved_model['optimizer_state_dict'])
-		saved_loss = np.load(config.model_save_path + '/Loss.npy').tolist()
+		saved_loss = np.load(config.loss_path).tolist()
 	else:
 		saved_loss = None
 
