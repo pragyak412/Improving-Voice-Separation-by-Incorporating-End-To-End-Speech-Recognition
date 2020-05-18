@@ -76,7 +76,7 @@ def test(cur_test, model, dataloader, loss_func):
 			iterator.set_description('Average Loss: '+str(np.array(all_loss).mean()))
 
 			if no % config.periodic_synthesis_test == 0 and no != 0:
-				saving(current_no=cur_test, estimated=separated, target=target, mixture=mixture, iteration=no)
+				saving(currentNo=cur_test, estimated=separated, target=target, mixture=mixture, iteration=no)
 
 	return all_loss
 
