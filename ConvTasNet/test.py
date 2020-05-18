@@ -12,17 +12,18 @@ from dataloader import normalise
 from torch.nn import DataParallel
 
 
-def saving(estimated, target, mixture, iteration=0):
+def saving(currentNo, estimated, target, mixture, iteration=0):
 
 	estimated = estimated.data.cpu().numpy()
 	target = target.data.cpu().numpy()
 	mixture = mixture.data.cpu().numpy()
 
-	os.makedirs(config.temporary_save_path['test'] + '/' + str(iteration), exist_ok=True)
+	base = config.temporary_save_path['test'] + '/' + str(currentNo) + '/' + str(iteration)
+	os.makedirs(base, exist_ok=True)
 
 	for i in range(estimated.shape[0]):
 
-		os.makedirs(config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i), exist_ok=True)
+		os.makedirs(base+ '/' + str(i), exist_ok=True)
 
 		target[i, 0] = normalise(target[i, 0])
 		target[i, 1] = normalise(target[i, 1])
@@ -33,25 +34,25 @@ def saving(estimated, target, mixture, iteration=0):
 		mixture[i] = normalise(mixture[i])
 
 		write(
-			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'target_0.wav', 8000,
+			base + '/' + str(i) + '/' + 'target_0.wav', 8000,
 			(target[i, 0]*np.iinfo(np.int16).max).astype(np.int16))
 		write(
-			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'target_1.wav', 8000,
+			base + '/' + str(i) + '/' + 'target_1.wav', 8000,
 			(target[i, 1]*np.iinfo(np.int16).max).astype(np.int16))
 
 		write(
-			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'estimated_0.wav', 8000,
+			base + '/' + str(i) + '/' + 'estimated_0.wav', 8000,
 			(estimated[i, 0]*np.iinfo(np.int16).max).astype(np.int16))
 		write(
-			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'estimated_1.wav', 8000,
+			base + '/' + str(i) + '/' + 'estimated_1.wav', 8000,
 			(estimated[i, 1]*np.iinfo(np.int16).max).astype(np.int16))
 
 		write(
-			config.temporary_save_path['test'] + '/' + str(iteration) + '/' + str(i) + '/' + 'mixture.wav', 8000,
+			base + '/' + str(i) + '/' + 'mixture.wav', 8000,
 			(mixture[i]*np.iinfo(np.int16).max).astype(np.int16))
 
 
-def test():
+def test(cur_test, model, dataloader, loss_func):
 
 	model.eval()
 	iterator = tqdm(dataloader)
@@ -74,29 +75,28 @@ def test():
 
 			iterator.set_description('Average Loss: '+str(np.array(all_loss).mean()))
 
-			if no % config.periodic_synthesis == 0 and no != 0:
-				saving(estimated=separated, target=target, mixture=mixture, iteration=no)
+			if no % config.periodic_synthesis_test == 0 and no != 0:
+				saving(current_no=cur_test, estimated=separated, target=target, mixture=mixture, iteration=no)
 
 	return all_loss
 
 
-if __name__ == "__main__":
+def main():
 
-	os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+	os.system('cp -r ../ConvTasNet "{0}"'.format(config.basePath+'/savedCode'))
+
 
 	model = DataParallel(ConvTasNet(C=2))
 	dataloader = AVSpeech('test')
-	dataloader = DataLoader(dataloader, batch_size=config.batchsize['test'], num_workers=config.num_workers['test'])
+	dataloader = DataLoader(dataloader, batch_size=config.batchsize['test'], num_workers=config.num_workers['test'], worker_init_fn=init_fn)
 	loss_func = SISNRPIT()
 
 	if config.use_cuda:
 		model = model.cuda()
 
+
 	config.pretrained_test = [
-		'/home/SharedData/Mayank/Audio/ConvTasNet_Models/ConvTasNet/164000.pth',
-		'/home/SharedData/Mayank/Audio/ConvTasNet_Models/ConvTasNet/174000.pth',
-		'/home/SharedData/Mayank/Audio/ConvTasNet_Models/ConvTasNet/184000.pth',
-		'/home/SharedData/Mayank/Audio/ConvTasNet_Models/ConvTasNet/199000.pth',
+		'',
 	]
 
 	for cur_test in config.pretrained_test:
@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
 		model.load_state_dict(torch.load(cur_test)['model_state_dict'])
 
-		total_loss = test()
+		total_loss = test(cur_test.split('/')[-1].split('.')[0], model, dataloader, loss_func)
 
 		torch.cuda.empty_cache()
 

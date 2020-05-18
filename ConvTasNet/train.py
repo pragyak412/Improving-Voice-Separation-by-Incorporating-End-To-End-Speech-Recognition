@@ -14,6 +14,7 @@ from shutil import copyfile
 from torch.nn import DataParallel
 import random
 
+
 def init_fn(worker_id):
 
     """
@@ -137,8 +138,6 @@ def train(model, dataloader, optimizer, loss_func, all_loss):
 def main():
 
 	os.system('cp -r ../ConvTasNet "{0}"'.format(config.basePath+'/savedCode'))
-
-	os.environ['CUDA_VISIBLE_DEVICES'] = config.num_cuda
 
 	model = DataParallel(ConvTasNet(C=2))
 

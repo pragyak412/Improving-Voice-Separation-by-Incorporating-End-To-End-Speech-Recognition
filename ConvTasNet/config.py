@@ -36,8 +36,8 @@ iterations = {
 dataset = {
 	'AVSpeech': {
 		'base_audio_path': {
-			'train': '',
-			'test': '',
+			'train': '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/train_wav_8000',
+			'test': '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/test_wav_8000',
 		}
 	}
 }
@@ -45,9 +45,10 @@ dataset = {
 num_speakers = 2
 
 periodic_synthesis = 10000
+periodic_synthesis_test = 1000
 periodic_checkpoint = 50000
 
-basePath = '/'+str(datetime.now())
+basePath = '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/Experiments/ConvTasNet/'+str(datetime.now())
 
 os.makedirs(basePath, exist_ok=True)
 
@@ -61,9 +62,9 @@ os.makedirs(temporary_save_path['test'], exist_ok=True)
 
 
 model_save_path = basePath
-pretrained_test = ''
+pretrained_test = '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/ConvTasNet_Models/ConvTasNet/1000.pth'
 
 pretrained = False
-pretrained_train = ''
-loss_path = ''
+pretrained_train = '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/Experiments/ConvTasNet/2020-05-14 12:43:32.867367/300000.pth'
+loss_path = '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/Experiments/ConvTasNet/2020-05-14 12:43:32.867367/Loss.npy'
 start = 300000
