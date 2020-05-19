@@ -8,7 +8,12 @@ from scipy.io.wavfile import read
 def normalise(audio):
 
 	audio = audio - audio.min()
-	audio = 2 * audio / audio.max()
+	maxAudio = audio.max()
+
+	if maxAudio == 0:
+		return None
+
+	audio = 2 * audio / maxAudio
 	audio = audio - audio.mean()
 	return audio
 
@@ -55,20 +60,26 @@ class AVSpeech(Dataset):
 				start2= np.random.randint(0, len(audio_2) - 24000)
 				end1, end2 = start1 + 24000, start2 + 24000
 				audio_1, audio_2 = audio_1[start1:end1], audio_2[start2:end2]
-				break
+				
+				audio_1 = normalise(audio_1)
+				
+				if audio_1 is None:
+					continue
+
+				audio_2 = normalise(audio_2)
+
+				if audio_2 is None:
+					continue
+
+				mixture = normalise(audio_1 + audio_2)
+
+				return \
+					mixture.astype(np.float32), \
+					np.concatenate([audio_1[None], audio_2[None]], axis=0).astype(np.float32), \
+					[self.speaker_1[item], self.speaker_2[item]]
 			else:
 
 				item = np.random.randint(len(self.speaker_1))
-
-		audio_1 = normalise(audio_1)
-		audio_2 = normalise(audio_2)
-
-		mixture = normalise(audio_1 + audio_2)
-
-		return \
-			mixture.astype(np.float32), \
-			np.concatenate([audio_1[None], audio_2[None]], axis=0).astype(np.float32), \
-			[self.speaker_1[item], self.speaker_2[item]]
 
 	def __len__(self):
 
