@@ -48,6 +48,7 @@ Testing:
 	python main.py test --modelpath "Path to trained model"
 
 
+
 ## ASR
 
 Inside the directory ETESpeechRecognition, set the config.py variables
@@ -79,9 +80,11 @@ Testing:
 
 Coming Soon
 
+
 ## Iterative Training
 
 Coming Soon
+
 
 ## Results
 
@@ -95,9 +98,15 @@ Coming Soon
 
 |    Method   |    SI-SNR   |
 | ----------- | ----------- |
-| ConvTasNet  |     TBD     |
+| ConvTasNet  |     9.699   |
 |   Oracle    |     TBD     |
 |  Iterative  |     TBD     |
+
+
+## Plots
+
+![ConvTasNet Testing Plot][ConvTasNet/Display/ConvTasNetTesting.png]
+
 
 ## Credits
 
