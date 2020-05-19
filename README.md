@@ -105,7 +105,7 @@ Coming Soon
 
 ## Plots
 
-![ConvTasNet Testing Plot][ConvTasNet/Display/ConvTasNetTesting.png]
+![ConvTasNet Testing Plot](ConvTasNet/Display/ConvTasNetTesting.png)
 
 
 ## Credits
