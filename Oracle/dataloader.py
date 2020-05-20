@@ -10,7 +10,7 @@ def normalise(audio):
 	audio = audio - audio.min()
 	maxAudio = audio.max()
 
-	if maxAudio is None:
+	if maxAudio == 0:
 		return None
 	audio = 2 * audio / maxAudio
 	audio = audio - audio.mean()
