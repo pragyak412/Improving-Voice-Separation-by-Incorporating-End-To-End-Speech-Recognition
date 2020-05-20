@@ -85,6 +85,9 @@ Coming Soon
 
 Coming Soon
 
+## Trained Model
+
+[ConvTasNet_Model](https://drive.google.com/file/d/1GrLlGq6XRirCS0MXH0JXqSRyY5G2nYNo/view?usp=sharing)
 
 ## Results
 
@@ -105,7 +108,7 @@ Coming Soon
 
 ## Plots
 
-![ConvTasNet Testing Plot][ConvTasNet/Display/ConvTasNetTesting.png]
+![ConvTasNet Testing Plot](ConvTasNet/Display/ConvTasNetTesting.png)
 
 
 ## Credits
