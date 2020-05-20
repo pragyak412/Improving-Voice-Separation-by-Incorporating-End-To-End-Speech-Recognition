@@ -95,7 +95,7 @@ def test(model, dataloader):
 
 def main():
 
-	os.system('cp -r ../ConvTasNet "{0}"'.format(config.basePath+'/savedCode'))
+	os.system('cp -r ../Oracle "{0}"'.format(config.basePath+'/savedCode'))
 
 	model = DataParallel(ConvTasNet(C=2, test_with_asr=True))
 	dataloader = AVSpeech('test')

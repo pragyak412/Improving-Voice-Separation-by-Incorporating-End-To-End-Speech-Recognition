@@ -92,7 +92,7 @@ def test(convtasnet_audio_without_asr_model, convtasnet_audio_with_asr_model, da
 
 def main():
 
-    os.system('cp -r ../ConvTasNet "{0}"'.format(config.basePath+'/savedCode'))
+    os.system('cp -r ../Oracle "{0}"'.format(config.basePath+'/savedCode'))
 
     convtasnet_audio_with_asr_model = DataParallel(ConvTasNet(C=2, test_with_asr=True)).cuda()
 

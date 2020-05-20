@@ -101,9 +101,9 @@ Coming Soon
 
 |    Method   |    SI-SNR   |
 | ----------- | ----------- |
-| ConvTasNet  |     9.699   |
-|   Oracle    |     TBD     |
-|  Iterative  |     TBD     |
+| ConvTasNet  |    9.699    |
+|   Oracle    |    13.483   |
+|  Iterative  |    10.781   |
 
 
 ## Plots
