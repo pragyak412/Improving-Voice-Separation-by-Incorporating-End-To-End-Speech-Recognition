@@ -11,6 +11,16 @@ from scipy.io.wavfile import write
 from dataloader import normalise
 from torch.nn import DataParallel
 
+def init_fn(worker_id):
+
+    """
+    Function to make the pytorch dataloader deterministic
+    :param worker_id: id of the parallel worker
+    :return:
+    """
+
+    np.random.seed(0 + worker_id)
+
 
 def saving(currentNo, estimated, target, mixture, iteration=0):
 
@@ -96,7 +106,7 @@ def main():
 
 
 	config.pretrained_test = [
-		'',
+		'/home/SharedData/Pragya/ModelsToUse/AudioOnlyConvTasNet.pth',
 	]
 
 	for cur_test in config.pretrained_test:

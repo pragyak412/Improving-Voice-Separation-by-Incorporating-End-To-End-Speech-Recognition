@@ -45,10 +45,10 @@ dataset = {
 num_speakers = 2
 
 periodic_synthesis = 10000
-periodic_synthesis_test = 1000
+periodic_synthesis_test = 10000 // 3
 periodic_checkpoint = 50000
 
-basePath = '/home/SharedData/Pragya/AVSpeech77HTest71HTrain/Experiments/ConvTasNet/'+str(datetime.now())
+basePath = '/home/SharedData/Pragya/Experiments/ConvTasNet/'+str(datetime.now())
 
 os.makedirs(basePath, exist_ok=True)
 

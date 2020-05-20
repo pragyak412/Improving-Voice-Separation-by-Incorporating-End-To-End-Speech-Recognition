@@ -12,6 +12,7 @@ def normalise(audio):
 
 	if maxAudio == 0:
 		return None
+
 	audio = 2 * audio / maxAudio
 	audio = audio - audio.mean()
 	return audio
@@ -59,6 +60,7 @@ class AVSpeech(Dataset):
 				start2 = np.random.randint(0, len(audio_2) - 24000)
 				end1, end2 = start1 + 24000, start2 + 24000
 				audio_1, audio_2 = audio_1[start1:end1], audio_2[start2:end2]
+				
 				audio_1 = normalise(audio_1)
 
 				if audio_1 is None:

@@ -56,8 +56,8 @@ class AVSpeech(Dataset):
 
 			if audio_1.shape[0] > 8000 * 3 and audio_2.shape[0] > 8000 * 3:
 
-				start1= np.random.randint(0, len(audio_1) - 24000)
-				start2= np.random.randint(0, len(audio_2) - 24000)
+				start1 = np.random.randint(0, len(audio_1) - 24000)
+				start2 = np.random.randint(0, len(audio_2) - 24000)
 				end1, end2 = start1 + 24000, start2 + 24000
 				audio_1, audio_2 = audio_1[start1:end1], audio_2[start2:end2]
 				
