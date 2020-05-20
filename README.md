@@ -1,7 +1,7 @@
 # VOICE SEPARATION 
 Paper: [Improving Voice Separation by Incorporating End-To-End Speech Recognition](https://ieeexplore.ieee.org/document/9053845)
 
-# Samples
+## Samples
 
 |   ConvTasNet   |    Oracle(With Estimated Input)   |   Oracle(With Target Input)   |
 | -------------- | --------------------------------- | ----------------------------- |
@@ -11,17 +11,13 @@ Paper: [Improving Voice Separation by Incorporating End-To-End Speech Recognitio
 |	[Estimated2](https://drive.google.com/open?id=1UeqUjACM5MQ82Gbkti2WJ500j_lu6zr3) |	 [Estimated2](https://drive.google.com/open?id=1vRN623PsnzgPrl8aNWgzJFKQ1_D7cggk)  |    [Estimated2](https://drive.google.com/open?id=1Ds04w1HKfi8tzhbcRZahIlqtWHFfdXPQ)               |
 |	[Mixture](https://drive.google.com/open?id=121smIq5ecnAfMi0n7pwT_CVxGuSkDl-k)	 |	 [Mixture](https://drive.google.com/open?id=1Rf3-EHQK7G7sMOVa5zTUQe6FrERzE25p)     |    [Mixture](https://drive.google.com/open?id=1OwSrgZpLCyYe_uso5Lal0VeqEpxaVL39)                  |
 
-ConvTasNet
-Oracle(With Target Input)
-Oracle(With Estimated Input)
+## Trained Model
 
-# Trained Model
-
-[ConvTasNet_Model](https://drive.google.com/file/d/1GrLlGq6XRirCS0MXH0JXqSRyY5G2nYNo/view?usp=sharing)
-[Oracle_Model](https://drive.google.com/open?id=1N812seOV1FtlTMYGg8w6Ov9fLkQBy1Kb)
+[ConvTasNet_Model](https://drive.google.com/file/d/1GrLlGq6XRirCS0MXH0JXqSRyY5G2nYNo/view?usp=sharing)  
+[Oracle_Model](https://drive.google.com/open?id=1N812seOV1FtlTMYGg8w6Ov9fLkQBy1Kb)  
 [ASR_Model](https://drive.google.com/open?id=1KOpQLAnYfiVb2FdRPo002ToaatOtV8Ww)
 
-# Downloading the dataset
+# #Downloading the dataset
 
 Install the packages axel, youtube-dl, parallel by using the following commands - 
 
